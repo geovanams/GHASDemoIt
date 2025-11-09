@@ -30,12 +30,20 @@ namespace UnsecureApp.Controllers
             {
                 SqlCommand sqlCommand = new SqlCommand()
                 {
-                    CommandText = "SELECT ProductId FROM Products WHERE ProductName = '" + productName + "'",
+                    CommandText = "SELECT ProductId FROM Products WHERE ProductName = @ProductName",
                     CommandType = CommandType.Text,
+                    Connection = connection
                 };
-
-                SqlDataReader reader = sqlCommand.ExecuteReader();
-                return reader.GetInt32(0); 
+                sqlCommand.Parameters.Add(new SqlParameter("@ProductName", productName));
+                connection.Open();
+                using (SqlDataReader reader = sqlCommand.ExecuteReader())
+                {
+                    if (reader.Read())
+                    {
+                        return reader.GetInt32(0);
+                    }
+                }
+                return -1; // Or throw exception, as appropriate
             }
         }
 
